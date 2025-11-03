@@ -26,12 +26,15 @@
 
 1.  필요한 라이브러리를 설치합니다.
     ```bash
-    pip install selenium beautifulsoup4 webdriver-manager
+    pip install flask selenium beautifulsoup4 webdriver-manager
     ```
-2.  파이썬 스크립트를 실행합니다.
+2.  파이썬 스크립트를 실행합니다. (터미널에서)
     ```bash
-    python crawl_test.py
+    python app.py
     ```
+3.  터미널에 `* Running on http://127.0.0.1:5000` 메시지가 뜨면,
+4.  '웹 브라우저'를 열고 `http://127.0.0.1:5000` 주소로 '방문'합니다.
+5.  약 5초간 '자동 크롤링'이 실행된 후, '실시간 분석 결과'가 '웹페이지'에 '표시'됩니다.
 
 ## 5. 다음 단계
 
