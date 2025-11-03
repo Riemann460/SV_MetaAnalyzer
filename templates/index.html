@@ -1,17 +1,32 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>프로젝트: 중앙값 덱</title>
+    <title>프로젝트: SV Deck Profiler</title>
+    <style>
+        table { border-collapse: collapse; width: 60%; }
+        th, td { border: 1px solid black; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
 </head>
 <body>
-    <h1>프로젝트: 중앙값 덱 (실시간 분석 결과)</h1>
+    <h1>프로젝트: SV Deck Profiler (실시간 분석 결과)</h1>
 
-    {% for card in results %}
+    <table>
+        <tr>
+            <th>카드 이름</th>
+            <th>분석 결과</th>
+            <th>평균 사용량</th>
+        </tr>
 
-        <p>
-            {{ card.name }} -> {{ card.type }} (평균: {{ card.average }})
-        </p>
+        {% for card in results %}
+        <tr>
+            <td>{{ card.name }}</td>
+            <td>{{ card.type }}</td>
+            <td>{{ card.average }}</td>
+        </tr>
+        {% endfor %}
 
-    {% endfor %}
+    </table>
+
 </body>
 </html>
