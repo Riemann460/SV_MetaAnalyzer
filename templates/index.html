@@ -11,6 +11,13 @@
 <body>
     <h1>프로젝트: SV Deck Profiler (실시간 분석 결과)</h1>
 
+    <label for="post_select_elm">포스트 선택:</label>
+    <select id="post_select_elm">
+        {% for post in posts %}
+        <option value="{{ post.url }}" {% if post.url == selected_post_url %}selected{% endif %}>{{ post.title }}</option>
+        {% endfor %}
+    </select>
+
     <label for="deckname_select_elm">덱 선택:</label>
     <select id="deckname_select_elm">
         {% for deck_name in deck_names %}
@@ -76,42 +83,75 @@
     </table>
 
     <script>
-        document.getElementById('deckname_select_elm').addEventListener('change', function() {
-            const selectedDeck = this.value;
-            fetch(`/get_deck_analysis/${selectedDeck}`)
+        const postSelect = document.getElementById('post_select_elm');
+        const deckSelect = document.getElementById('deckname_select_elm');
+        const tableBody = document.querySelector('#card_analysis_table tbody');
+
+        function getScoreSymbol(score) {
+            if (score === 'N/A' || score === 'INF') {
+                return score;
+            }
+            const scoreValue = parseFloat(score);
+            if (scoreValue >= 0.2) {
+                return 'O';
+            } else if (scoreValue >= 0.1) {
+                return '△';
+            } else {
+                return 'X';
+            }
+        }
+
+        function updateTable(data) {
+            tableBody.innerHTML = ''; // Clear existing rows
+            data.forEach(card => {
+                const row = tableBody.insertRow();
+                row.insertCell().textContent = card.name;
+                row.insertCell().textContent = card.average;
+                row.insertCell().textContent = card.variance;
+                row.insertCell().textContent = card.std_dev;
+                row.insertCell().textContent = card.rounded_average;
+                row.insertCell().textContent = card.delta;
+                row.insertCell().textContent = card.adjusted_count;
+                row.insertCell().textContent = getScoreSymbol(card.removability_score);
+                row.insertCell().textContent = getScoreSymbol(card.addability_score);
+            });
+        }
+
+        function fetchAnalysis(postUrl, deckName) {
+            fetch(`/get_deck_analysis?url=${encodeURIComponent(postUrl)}&deck_name=${encodeURIComponent(deckName)}`)
                 .then(response => response.json())
                 .then(data => {
-                    const tableBody = document.querySelector('#card_analysis_table tbody');
-                    tableBody.innerHTML = ''; // Clear existing rows
-
-                    function getScoreSymbol(score) {
-                        if (score === 'N/A' || score === 'INF') {
-                            return score;
-                        }
-                        const scoreValue = parseFloat(score);
-                        if (scoreValue >= 0.2) {
-                            return 'O';
-                        } else if (scoreValue >= 0.1) {
-                            return '△';
-                        } else {
-                            return 'X';
-                        }
-                    }
-
-                    data.forEach(card => {
-                        const row = tableBody.insertRow();
-                        row.insertCell().textContent = card.name;
-                        row.insertCell().textContent = card.average;
-                        row.insertCell().textContent = card.variance;
-                        row.insertCell().textContent = card.std_dev;
-                        row.insertCell().textContent = card.rounded_average;
-                        row.insertCell().textContent = card.delta;
-                        row.insertCell().textContent = card.adjusted_count;
-                        row.insertCell().textContent = getScoreSymbol(card.removability_score);
-                        row.insertCell().textContent = getScoreSymbol(card.addability_score);
-                    });
+                    updateTable(data);
                 })
                 .catch(error => console.error('Error fetching deck analysis:', error));
+        }
+
+        postSelect.addEventListener('change', function() {
+            const selectedPostUrl = this.value;
+            fetch(`/get_deck_names_for_post?url=${encodeURIComponent(selectedPostUrl)}`)
+                .then(response => response.json())
+                .then(deckNames => {
+                    // Update deck dropdown
+                    deckSelect.innerHTML = '';
+                    deckNames.forEach(name => {
+                        const option = document.createElement('option');
+                        option.value = name;
+                        option.textContent = name;
+                        deckSelect.appendChild(option);
+                    });
+
+                    // Fetch analysis for the first deck in the new list
+                    if (deckNames.length > 0) {
+                        fetchAnalysis(selectedPostUrl, deckNames[0]);
+                    }
+                })
+                .catch(error => console.error('Error fetching deck names:', error));
+        });
+
+        deckSelect.addEventListener('change', function() {
+            const selectedDeckName = this.value;
+            const selectedPostUrl = postSelect.value;
+            fetchAnalysis(selectedPostUrl, selectedDeckName);
         });
     </script>
 

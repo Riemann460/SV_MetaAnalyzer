@@ -1,6 +1,6 @@
 from functools import total_ordering
 
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 import time
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -11,238 +11,7 @@ from selenium.webdriver.common.by import By
 import numpy as np
 import math
 
-card_data = [
-    {
-        "name": "刹那のクイックブレイダー",
-        "deck_counts": [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 3, 2],
-        "median": 3,
-        "average": 2.8,
-        "count_3": 11,
-        "count_2": 2,
-        "count_1": 0,
-        "count_0": 0
-    },
-    {
-        "name": "返還の剣閃",
-        "deck_counts": [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-        "median": 3,
-        "average": 3.0,
-        "count_3": 13,
-        "count_2": 0,
-        "count_1": 0,
-        "count_0": 0
-    },
-    {
-        "name": "簒奪のアジト",
-        "deck_counts": [2, 2, 3, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3],
-        "median": 2,
-        "average": 2.3,
-        "count_3": 5,
-        "count_2": 8,
-        "count_1": 0,
-        "count_0": 0
-    },
-    {
-        "name": "異端の侍",
-        "deck_counts": [0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-        "median": 0,
-        "average": 0.2,
-        "count_3": 0,
-        "count_2": 0,
-        "count_1": 3,
-        "count_0": 10
-    },
-    {
-        "name": "勇猛のルミナスランサー",
-        "deck_counts": [0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0],
-        "median": 0,
-        "average": 0.1,
-        "count_3": 0,
-        "count_2": 1,
-        "count_1": 0,
-        "count_0": 12
-    },
-    {
-        "name": "簒奪の肯定者",
-        "deck_counts": [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-        "median": 3,
-        "average": 3.0,
-        "count_3": 13,
-        "count_2": 0,
-        "count_1": 0,
-        "count_0": 0
-    },
-    {
-        "name": "簒奪の祈祷者",
-        "deck_counts": [3, 3, 3, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-        "median": 3,
-        "average": 2.9,
-        "count_3": 12,
-        "count_2": 1,
-        "count_1": 0,
-        "count_0": 0
-    },
-    {
-        "name": "信念の蹴撃・ランドル",
-        "deck_counts": [0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0],
-        "median": 0,
-        "average": 0.2,
-        "count_3": 1,
-        "count_2": 0,
-        "count_1": 0,
-        "count_0": 12
-    },
-    {
-        "name": "干絶の顕現・ギルネリーゼ",
-        "deck_counts": [0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "median": 0,
-        "average": 0.1,
-        "count_3": 0,
-        "count_2": 0,
-        "count_1": 2,
-        "count_0": 11
-    },
-    {
-        "name": "試練の石板",
-        "deck_counts": [3, 2, 3, 3, 3, 3, 3, 0, 3, 0, 3, 2, 3],
-        "median": 3,
-        "average": 2.3,
-        "count_3": 9,
-        "count_2": 2,
-        "count_1": 0,
-        "count_0": 2
-    },
-    {
-        "name": "サイレントスナイパー・ワルツ",
-        "deck_counts": [3, 2, 3, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-        "median": 3,
-        "average": 2.8,
-        "count_3": 11,
-        "count_2": 2,
-        "count_1": 0,
-        "count_0": 0
-    },
-    {
-        "name": "常在戦場・カゲミツ",
-        "deck_counts": [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "median": 0,
-        "average": 0.0,
-        "count_3": 0,
-        "count_2": 0,
-        "count_1": 1,
-        "count_0": 12
-    },
-    {
-        "name": "空絶の顕現・オクトリス",
-        "deck_counts": [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-        "median": 3,
-        "average": 3.0,
-        "count_3": 13,
-        "count_2": 0,
-        "count_1": 0,
-        "count_0": 0
-    },
-    {
-        "name": "燃え滾る闘志・フェザー",
-        "deck_counts": [0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0],
-        "median": 0,
-        "average": 0.1,
-        "count_3": 0,
-        "count_2": 1,
-        "count_1": 0,
-        "count_0": 12
-    },
-    {
-        "name": "王断の天宮・スタチウム",
-        "deck_counts": [0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0],
-        "median": 0,
-        "average": 0.1,
-        "count_3": 0,
-        "count_2": 1,
-        "count_1": 0,
-        "count_0": 12
-    },
-    {
-        "name": "簒奪の団結者",
-        "deck_counts": [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-        "median": 3,
-        "average": 3.0,
-        "count_3": 13,
-        "count_2": 0,
-        "count_1": 0,
-        "count_0": 0
-    },
-    {
-        "name": "真紅と群青・ゼタ＆ベアトリクス",
-        "deck_counts": [3, 3, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-        "median": 3,
-        "average": 2.9,
-        "count_3": 12,
-        "count_2": 1,
-        "count_1": 0,
-        "count_0": 0
-    },
-    {
-        "name": "卓越のルミナスメイジ",
-        "deck_counts": [0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0],
-        "median": 0,
-        "average": 0.1,
-        "count_3": 0,
-        "count_2": 1,
-        "count_1": 0,
-        "count_0": 12
-    },
-    {
-        "name": "レヴィオンの迅雷・アルベール",
-        "deck_counts": [3, 3, 3, 3, 3, 3, 3, 2, 3, 3, 3, 3, 3],
-        "median": 3,
-        "average": 2.9,
-        "count_3": 12,
-        "count_2": 1,
-        "count_1": 0,
-        "count_0": 0
-    },
-    {
-        "name": "リッター・シュナイト",
-        "deck_counts": [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "median": 0,
-        "average": 0.0,
-        "count_3": 0,
-        "count_2": 0,
-        "count_1": 1,
-        "count_0": 12
-    },
-    {
-        "name": "簒奪の継承者・シンセライズ",
-        "deck_counts": [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-        "median": 3,
-        "average": 3.0,
-        "count_3": 13,
-        "count_2": 0,
-        "count_1": 0,
-        "count_0": 0
-    },
-    {
-        "name": "運命の黄昏・オーディン",
-        "deck_counts": [3, 3, 3, 2, 3, 3, 3, 2, 3, 2, 3, 3, 3],
-        "median": 3,
-        "average": 2.7,
-        "count_3": 10,
-        "count_2": 3,
-        "count_1": 0,
-        "count_0": 0
-    },
-    {
-        "name": "テンタクルバイト",
-        "deck_counts": [2, 2, 2, 1, 2, 1, 2, 1, 2, 0, 2, 2, 2],
-        "median": 2,
-        "average": 1.6,
-        "count_3": 0,
-        "count_2": 9,
-        "count_1": 3,
-        "count_0": 1
-    }
-]
+driver = None # Selenium 웹 드라이버를 위한 전역 변수
 
 app = Flask(__name__)
 
@@ -278,7 +47,7 @@ def select_replacement_candidates(cards):
     v_final = np.array([card.adjusted_count for card in cards])
     epsilon = 1e-6
 
-    # Calculate removability scores
+    # 제거 가능성 점수 계산
     for i, card in enumerate(cards):
         if card.adjusted_count > 0:
             v_temp = v_final.copy()
@@ -287,7 +56,7 @@ def select_replacement_candidates(cards):
             penalty = np.sum(((v_temp_delta / (v_std_dev + epsilon)) ** 2))
             card.removability_score = 1 / penalty if penalty != 0 else np.inf
 
-    # Calculate addability scores
+    # 추가 가능성 점수 계산
     for i, card in enumerate(cards):
         if card.adjusted_count < 3:
             v_temp = v_final.copy()
@@ -297,33 +66,53 @@ def select_replacement_candidates(cards):
             card.addability_score = 1 / penalty if penalty != 0 else np.inf
 
 
-def get_driver():
-    service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service)
-    return driver
+def init_driver():
+    global driver
+    if driver is None:
+        service = Service(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service)
 
-def get_deck_names():
-    driver = get_driver()
-    url = "https://svlabo.jp/blog-entry-1467.html"
+def get_post_list():
+    init_driver()
+    url = "https://svlabo.jp/"
     driver.get(url)
-    time.sleep(5)  # Wait for the page to load and JavaScript to execute
+    time.sleep(5)  # 동적 페이지 로딩 대기
+
+    posts = []
+    all_links = driver.find_elements(By.TAG_NAME, "a")
+    
+    for link in all_links:
+        try:
+            title = link.text
+            # "デッキリスト比較"가 포함된 포스트만 필터링
+            if "デッキリスト比較" in title:
+                url = link.get_attribute('href')
+                # 중복 방지를 위해 URL 존재 여부 및 중복 체크
+                if url and url not in [p['url'] for p in posts]:
+                    posts.append({"title": title, "url": url})
+        except Exception as e:
+            # Stale-Element-Exception 등 반복 중 발생 가능한 오류 처리
+            continue
+    return posts
+
+def get_deck_names(url):
+    init_driver()
+    driver.get(url)
+    time.sleep(5)  # 동적 페이지 로딩 대기
     deck_select_element = driver.find_element(By.ID, "deckname_select_elm")
     select_obj = Select(deck_select_element)
     options = [option.text for option in select_obj.options]
-    driver.quit()
     return options
 
-def scrape_card_data(deck_name):
-    driver = get_driver()
-    url = "https://svlabo.jp/blog-entry-1467.html"
+def scrape_card_data(url, deck_name):
+    init_driver()
     driver.get(url)
-    time.sleep(5)  # Wait for the page to load and JavaScript to execute
+    time.sleep(5)  # 동적 페이지 로딩 대기
     deck_select_element = driver.find_element(By.ID, "deckname_select_elm")
     select_obj = Select(deck_select_element)
     select_obj.select_by_visible_text(deck_name)
-    time.sleep(3)  # Wait for the data to update after selection
+    time.sleep(3)  # 데이터 업데이트 대기
     html = driver.page_source
-    driver.quit()
     return BeautifulSoup(html, 'html.parser')
 
 def calculate_initial_analysis(soup):
@@ -347,53 +136,56 @@ def calculate_initial_analysis(soup):
         cells_in_row = row.find_all("td")
         numbers_int_list = [int(cell.text) for cell in cells_in_row[1:-6]]
         numerator = sum(count * weight for count, weight in zip(numbers_int_list, weights_list))
-        weighted_average = numerator / total_weight
         
-        # Calculate weighted variance
-        weighted_variance = sum(w * ((x - weighted_average) ** 2) for x, w in zip(numbers_int_list, weights_list)) / total_weight
+        # 가중치 합계가 0일 경우의 'divide by zero' 오류 방지
+        if total_weight == 0:
+            weighted_average = 0.0
+            weighted_variance = 0.0
+        else:
+            weighted_average = numerator / total_weight
+            weighted_variance = sum(w * ((x - weighted_average) ** 2) for x, w in zip(numbers_int_list, weights_list)) / total_weight
         
         cards.append(Card(card_name_text, weighted_average, weighted_variance))
     return cards
 
+# 덱의 총 카드 수가 40장이 되도록 카드를 추가/제거하여 "표준 덱"을 구성합니다.
+# 전체 카드 분포와의 편차(패널티)가 가장 적어지는 카드를 순차적으로 찾아 조정합니다.
 def adjust_deck_count(cards):
     v_avg = np.array([card.weighted_average for card in cards])
     v_std_dev = np.array([card.std_dev for card in cards])
     v_current = np.array([card.rounded_average for card in cards])
 
     cards_to_adjust = sum(v_current) - 40
-    epsilon = 1e-6  # To avoid division by zero
+    epsilon = 1e-6  # 0으로 나누기 오류 방지
 
-    # Loop until the deck has 40 cards
     while cards_to_adjust != 0:
         best_card_index = -1
         min_penalty = np.inf
 
-        # Determine if we are adding or removing cards
+        # 추가할지 제거할지 결정
         adjustment = -1 if cards_to_adjust > 0 else 1
 
-        # Find the best card to adjust
+        # 가장 패널티가 적은 카드를 찾기
         for i, card in enumerate(cards):
-            # Check if the adjustment is possible
             if (adjustment == -1 and v_current[i] > 0) or (adjustment == 1 and v_current[i] < 3):
                 v_temp = v_current.copy()
                 v_temp[i] += adjustment
                 
                 v_temp_delta = v_temp - v_avg
                 
-                # Calculate penalty
                 penalty = np.sum(((v_temp_delta / (v_std_dev + epsilon)) ** 2))
 
                 if penalty < min_penalty:
                     min_penalty = penalty
                     best_card_index = i
 
-        # Apply the best adjustment found
+        # 찾은 최적의 카드를 덱에 반영
         if best_card_index != -1:
             v_current[best_card_index] += adjustment
             cards[best_card_index].adjusted_count += adjustment
             cards_to_adjust += adjustment
         else:
-            # Should not happen if there are valid cards to adjust
+            # 더 이상 조정할 카드가 없으면 루프 종료
             break
 
 def select_replacement_candidates(cards):
@@ -402,7 +194,7 @@ def select_replacement_candidates(cards):
     v_final = np.array([card.adjusted_count for card in cards])
     epsilon = 1e-6
 
-    # Calculate removability scores
+    # 제거 가능성 점수 계산
     for i, card in enumerate(cards):
         if card.adjusted_count > 0:
             v_temp = v_final.copy()
@@ -411,7 +203,7 @@ def select_replacement_candidates(cards):
             penalty = np.sum(((v_temp_delta / (v_std_dev + epsilon)) ** 2))
             card.removability_score = 1 / penalty
 
-    # Calculate addability scores
+    # 추가 가능성 점수 계산
     for i, card in enumerate(cards):
         if card.adjusted_count < 3:
             v_temp = v_final.copy()
@@ -420,8 +212,8 @@ def select_replacement_candidates(cards):
             penalty = np.sum(((v_temp_delta / (v_std_dev + epsilon)) ** 2))
             card.addability_score = 1 / penalty
 
-def analyze_live_data(deck_name):
-    soup = scrape_card_data(deck_name)
+def analyze_live_data(url, deck_name):
+    soup = scrape_card_data(url, deck_name)
     cards = calculate_initial_analysis(soup)
     round_sum = sum(card.rounded_average for card in cards)
     adjust_deck_count(cards)
@@ -443,25 +235,52 @@ def analyze_live_data(deck_name):
 
 @app.route("/")
 def index():
-    deck_names = get_deck_names()
+    posts = get_post_list()
+    if not posts:
+        return "포스트 목록을 가져오지 못했습니다.", 500
+
+    # 기본값으로 첫 포스트의 첫 덱 데이터를 로드
+    default_post_url = posts[0]['url']
+    deck_names = get_deck_names(default_post_url)
     if not deck_names:
         return "덱 이름을 가져오지 못했습니다.", 500
     
     default_deck_name = deck_names[0]
-    initial_data = analyze_live_data(default_deck_name)
+    initial_data = analyze_live_data(default_post_url, default_deck_name)
     
     if not initial_data:
         return "초기 데이터를 로드하지 못했습니다.", 500
         
-    return render_template("index.html", deck_names=deck_names, results=initial_data, selected_deck=default_deck_name)
+    return render_template("index.html", posts=posts, deck_names=deck_names, results=initial_data, selected_post_url=default_post_url, selected_deck=default_deck_name)
 
-@app.route("/get_deck_analysis/<deck_name>")
-def get_deck_analysis(deck_name):
-    analysis_results = analyze_live_data(deck_name)
+@app.route("/get_deck_analysis")
+def get_deck_analysis():
+    post_url = request.args.get('url')
+    deck_name = request.args.get('deck_name')
+    if not post_url or not deck_name:
+        return jsonify({"error": "URL과 덱 이름이 필요합니다."}), 400
+
+    analysis_results = analyze_live_data(post_url, deck_name)
     if not analysis_results:
         return jsonify({"error": "데이터 로딩에 실패했거나 데이터가 없습니다."}), 500
     return jsonify(analysis_results)
 
+@app.route("/get_deck_names_for_post")
+def get_deck_names_for_post():
+    post_url = request.args.get('url')
+    if not post_url:
+        return jsonify({"error": "URL이 필요합니다."}), 400
+    
+    deck_names = get_deck_names(post_url)
+    if not deck_names:
+        return jsonify({"error": "덱 이름을 가져오지 못했습니다."}), 500
+    return jsonify(deck_names)
+
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    try:
+        app.run(debug=True)
+    finally:
+        if driver:
+            print("Shutting down driver...")
+            driver.quit()
