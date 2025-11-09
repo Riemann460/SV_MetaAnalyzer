@@ -1,28 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>프로젝트: SV Deck Profiler</title>
-    <style>
-        body { font-family: sans-serif; }
-        table { border-collapse: collapse; width: 95%; margin-top: 20px; }
-        th, td { border: 1px solid black; padding: 8px; text-align: left; }
-        th.sortable { background-color: #f2f2f2; cursor: pointer; position: relative; }
-        th.sortable:hover { background-color: #e2e2e2; }
-        th.sortable::after { content: ''; position: absolute; right: 8px; top: 50%; margin-top: -7px; border-width: 5px; border-style: solid; border-color: transparent; opacity: 0.3; }
-        th.sort-asc::after { border-bottom-color: black; opacity: 1; }
-        th.sort-desc::after { border-top-color: black; opacity: 1; }
-        .controls { margin-bottom: 10px; display: flex; align-items: center; flex-wrap: wrap; }
-        .control-group { margin-right: 20px; margin-bottom: 10px; }
-        .adjust-btn { margin: 0 5px; cursor: pointer; width: 25px; }
-        td:nth-child(4) { text-align: center; } /* Center the custom count column */
-        #deck-total { font-weight: bold; }
-        .count-increased { background-color: #e6ffed !important; } /* light green */
-        .count-decreased { background-color: #ffe6e6 !important; } /* light red */
-        #copy-feedback { margin-left: 10px; color: green; font-weight: bold; visibility: hidden; }
-    </style>
+    <title>SV Meta Analyzer</title>
 </head>
 <body>
-    <h1>프로젝트: SV Deck Profiler (실시간 분석 결과)</h1>
+    <h1>SV Meta Analyzer (실시간 덱 분석)</h1>
 
     <div class="controls">
         <div class="control-group">
