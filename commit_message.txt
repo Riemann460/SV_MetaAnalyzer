@@ -1,0 +1,4 @@
+chore: Rename project to SV_MetaAnalyzer
+
+- Renamed the project from SV_DeckProfiler to SV_MetaAnalyzer.
+- Updated all relevant files including documentation, source code, and IDE configurations to reflect the new name.
