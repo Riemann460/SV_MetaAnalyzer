@@ -301,8 +301,40 @@ deckSelect.addEventListener('change', function() {
 // --- 초기 로드 ---
 fetchAnalysis(postSelect.value, deckSelect.value);
 
+/**
+ * 덱 이름에서 클래스 ID를 추출합니다.
+ * @param {string} deckName - 분석할 덱의 이름.
+ * @returns {number|null} 클래스 ID 또는 찾지 못한 경우 null.
+ */
+function getClassIdFromName(deckName) {
+    const classMap = {
+        'E': 1,
+        'R': 2,
+        'W': 3,
+        'D': 4,
+        'Ni': 5,
+        'B': 6,
+        'Nm': 7
+    };
+
+    for (const key in classMap) {
+        if (deckName.includes(key)) {
+            return classMap[key];
+        }
+    }
+    return null; // 클래스를 찾지 못한 경우
+}
+
 // 덱 코드 복사 버튼 이벤트 리스너
 document.getElementById('copy-deck-button').addEventListener('click', function() {
+    const deckName = deckSelect.value;
+    const classId = getClassIdFromName(deckName);
+
+    if (classId === null) {
+        alert('덱 이름에서 클래스를 식별할 수 없습니다. 덱 코드 생성이 정확하지 않을 수 있습니다.');
+        return;
+    }
+
     const deckForApi = [];
     currentDeckData.forEach(card => {
         for (let i = 0; i < card.adjusted_count; i++) {
@@ -315,7 +347,7 @@ document.getElementById('copy-deck-button').addEventListener('click', function()
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ deck: deckForApi }),
+        body: JSON.stringify({ deck: deckForApi, class_id: classId }),
     })
     .then(response => response.json())
     .then(data => {

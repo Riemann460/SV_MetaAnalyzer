@@ -423,6 +423,7 @@ def generate_deck_code():
         return jsonify({"error": "덱 데이터가 필요합니다."}), 400
 
     card_names_list = data['deck']
+    class_id = data.get('class_id', 2) # class_id가 없으면 기본값 2 (Swordcraft) 사용
     
     # 1. 카드 이름별로 매수 카운트
     from collections import Counter
@@ -456,7 +457,7 @@ def generate_deck_code():
             hashes.append(encoded_str)
         
     # 최종 덱 코드 생성 (클래스.포맷.해시...)
-    deck_code = "https://shadowverse-wb.com/web/Deck/share?hash=2.2." + ".".join(hashes) + "&lang=ko"
+    deck_code = f"https://shadowverse-wb.com/web/Deck/share?hash=2.{class_id}." + ".".join(hashes) + "&lang=ko"
     
     return jsonify({"deck_code": deck_code})
 
