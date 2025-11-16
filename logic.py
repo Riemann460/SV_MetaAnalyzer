@@ -7,6 +7,9 @@ from collections import Counter
 # logic.py - 데이터 처리 및 비즈니스 로직
 import scraper
 
+# --- Constants ---
+DECK_SIZE = 40
+
 # --- 전역 변수 대신 사용할 데이터 컨테이너 ---
 card_database = {}
 card_id_by_normalized_name = {}
@@ -181,7 +184,7 @@ def adjust_deck_count(cards):
     v_std_dev = np.array([card.std_dev for card in cards])
     v_current = np.array([card.rounded_average for card in cards])
 
-    cards_to_adjust = sum(v_current) - 40
+    cards_to_adjust = sum(v_current) - DECK_SIZE
     epsilon = 1e-6
 
     while cards_to_adjust != 0:
@@ -237,8 +240,8 @@ def analyze_live_data(url, deck_name):
 
     analysis_results = [card.to_dict() for card in cards]
     analysis_results.append({
-        "name": "총 합", "average": "40", "variance": "N/A", "std_dev": "N/A",
-        "rounded_average": f"{round_sum}", "delta": "40", "adjusted_count": "40",
+        "name": "총 합", "average": f"{DECK_SIZE}", "variance": "N/A", "std_dev": "N/A",
+        "rounded_average": f"{round_sum}", "delta": f"{DECK_SIZE}", "adjusted_count": f"{DECK_SIZE}",
         "removability_score": "N/A", "addability_score": "N/A"
     })
     return analysis_results
