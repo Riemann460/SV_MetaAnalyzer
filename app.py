@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template, jsonify, request
 
 import scraper
@@ -87,7 +88,10 @@ def generate_deck_code():
 if __name__ == '__main__':
     # 필수 구성 요소 초기화
     logic.load_card_database()
-    scraper.init_driver() # 종료 훅도 함께 등록됩니다
+    
+    # Flask 디버그 모드 적용 시, 리로더 자식 프로세스(WERKZEUG_RUN_MAIN == 'true')에서만 웹드라이버를 시작하여 이중 실행을 방지합니다.
+    if os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
+        scraper.init_driver()
     
     # Flask 앱 실행
     app.run(debug=True)
