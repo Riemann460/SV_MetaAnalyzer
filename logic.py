@@ -1,6 +1,10 @@
+# -*- coding: utf-8 -*-
+# 이 모듈은 데이터 처리 및 표준 덱 분석 비즈니스 로직을 수행합니다.
 import math
 import json
 from datetime import datetime
+from typing import List
+from bs4 import BeautifulSoup
 import numpy as np
 from collections import Counter
 
@@ -79,10 +83,11 @@ class Card:
             "addability_score": f"{self.addability_score:.4f}" if self.addability_score != np.inf else "INF"
         }
 
-def calculate_initial_analysis(soup):
+def calculate_initial_analysis(soup: BeautifulSoup) -> List[Card]:
+    """BeautifulSoup 객체에서 테이블 데이터를 추출하여 가중 평균 카드 사용량을 분석합니다."""
     table_head = soup.select_one(scraper.TABLE_HEADER_ID)
     if not table_head:
-        return []
+        raise ValueError("테이블 헤더를 찾을 수 없습니다.")
 
     num_samples = 0
     rating_values = []
@@ -100,7 +105,9 @@ def calculate_initial_analysis(soup):
                 num_samples = 0
 
         if num_samples == 0:
-            streak_header = header_rows[0].find("th", string=lambda t: t and '連勝数' in t)
+            streak_header = header_rows[0].find("th", string=lambda t: t and '連勝수' in t)
+            if not streak_header:
+                streak_header = header_rows[0].find("th", string=lambda t: t and '連勝数' in t)
             if streak_header and streak_header.has_attr('colspan'):
                 try:
                     num_samples = int(streak_header['colspan'])
@@ -108,17 +115,22 @@ def calculate_initial_analysis(soup):
                     num_samples = 0
 
         if num_samples == 0:
-            generic_header = header_rows[0].find("th", string=lambda t: t and '採用枚数' in t)
+            generic_header = header_rows[0].find("th", string=lambda t: t and '採用枚수' in t)
+            if not generic_header:
+                generic_header = header_rows[0].find("th", string=lambda t: t and '採用枚数' in t)
             if generic_header and generic_header.has_attr('colspan'):
                 try:
                     num_samples = int(generic_header['colspan'])
                 except (ValueError, IndexError):
-                    return []
+                    raise ValueError("유효하지 않은 테이블 헤더 구조입니다.")
 
-    if num_samples == 0: return []
+    if num_samples == 0:
+        raise ValueError("분석할 카드 표본 데이터를 찾을 수 없습니다.")
 
     table_body = soup.select_one(scraper.DECKLIST_BODY_ID)
-    if not table_body: return []
+    if not table_body:
+        raise ValueError("테이블 바디를 찾을 수 없습니다.")
+
     all_rows = table_body.find_all("tr")
     date_values = []
     card_rows = []
@@ -126,12 +138,13 @@ def calculate_initial_analysis(soup):
         first_cell = row.find(['th', 'td'])
         if not first_cell: continue
         
-        if '使用日' in first_cell.text:
+        if '使用日' in first_cell.text or '使用일' in first_cell.text:
             date_values = [cell.text.strip() for cell in row.find_all('td')[:num_samples]]
         elif row.find("div", class_="name_backimg2"):
             card_rows.append(row)
 
-    if not card_rows: return []
+    if not card_rows:
+        raise ValueError("분석에 필요한 카드 행 데이터를 찾을 수 없습니다.")
 
     final_weights = [1.0] * num_samples
     if date_values:
@@ -140,8 +153,12 @@ def calculate_initial_analysis(soup):
         for i, date_str in enumerate(date_values):
             if i < len(final_weights):
                 try:
-                    date_obj = datetime.strptime(date_str, "%m/%d").replace(year=today.year)
-                    if date_obj > today: date_obj = date_obj.replace(year=today.year - 1)
+                    # 날짜 문자열에 현재 연도를 포함하여 파싱을 시도합니다. 윤년 예외를 방지합니다.
+                    date_str_with_year = f"{today.year}/{date_str}"
+                    date_obj = datetime.strptime(date_str_with_year, "%Y/%m/%d")
+                    if date_obj > today:
+                        # 미래 날짜인 경우 이전 연도로 보정합니다.
+                        date_obj = date_obj.replace(year=today.year - 1)
                     days_ago = (today - date_obj).days
                     final_weights[i] *= max(0.1, 1.0 - (days_ago / (half_life_days * 2)))
                 except ValueError:
