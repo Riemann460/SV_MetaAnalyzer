@@ -22,7 +22,50 @@
     *   **변경사항 추적:** 최초 추천안과 달라진 카드의 행은 색상으로 표시되어 변경 내역을 쉽게 확인할 수 있습니다.
 5.  **덱 url 생성 및 복사:** 편집이 완료된 덱은 '덱 url 복사' 버튼을 통해 게임에서 즉시 사용할 수 있는 **덱 공유 URL**로 변환되어 클립보드에 복사됩니다.
 
-## 3. 핵심 기술
+## 3. 파이프라인 흐름 및 역할 분류
+
+### 3.1. 파이프라인 흐름도
+
+```mermaid
+graph TD
+    subgraph Data Setup
+        A[create_card_db.py] -->|DB 구축| B[(card_database.json)]
+    end
+
+    subgraph Data Collection
+        C[scraper.py] -->|svlabo 포스트 & 덱 동적 크롤링| D[BeautifulSoup 객체]
+    end
+
+    subgraph Data Processing
+        D --> E[logic.py]
+        B -->|카드 ID 매핑| E
+        E -->|가중 평균 산출 / 40장 조율| F[표준 덱 데이터]
+    end
+
+    subgraph Presentation & API Layer
+        G[app.py] -->|Flask API 라우팅| F
+        G -->|템플릿 렌더링| H[index.html]
+    end
+
+    subgraph Frontend Interaction
+        H --> I[main.js / ui.js]
+        J[styles.css] -->|테마 적용| H
+        I -->|동적 덱 편집 / 복사| K[최종 덱 코드 공유]
+    end
+```
+
+### 3.2. 역할별 정의
+
+| 파이프라인 단계 | 소스 파일 / 리소스 | 입력 데이터 (Input) | 출력 데이터 (Output) | 주요 비즈니스 역할 |
+| :--- | :--- | :--- | :--- | :--- |
+| **데이터 준비** | `create_card_db.py` | 섀도우버스 덱포탈 사이트 | `card_database.json` | 카드명-ID 매핑 데이터베이스 동적 크롤링 및 구축 |
+| **데이터 수집** | `scraper.py` | `svlabo.jp` 웹 페이지 | HTML `BeautifulSoup` 객체 | Selenium WebDriver 재사용 기반의 동적 포스트 및 덱 수집 |
+| **데이터 연산** | `logic.py` | HTML 객체, `card_database.json` | 가중 분석 결과 리스트, 덱 해시 리스트 | 통합 가중치 평균 계산, 40장 수량 자동 교환 및 해시 변환 |
+| **서비스 제공** | `app.py` | 사용자 HTTP 요청 | HTML 템플릿, JSON API 응답 | Flask 프레임워크 라우팅 제어 및 API 통신 제어 |
+| **화면 연동** | `main.js`, `ui.js` | API JSON 응답, 사용자 클릭 이벤트 | 동적 DOM 변경, 클립보드 덱 코드 | 테이블 정렬, 지능형 덱 카드 매수 실시간 조절 및 공유 처리 |
+| **디자인 테마** | `styles.css` | 브라우저 렌더러 | 스타일이 적용된 웹 뷰 | 다크 모드, 글래스모피즘, 증감률 및 채용도 시각 지시자 표현 |
+
+## 4. 핵심 기술
 
 *   **Language:** `Python`
 *   **Web Framework:** `Flask`
