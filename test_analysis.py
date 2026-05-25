@@ -59,5 +59,19 @@ class TestAnalysisLogic(unittest.TestCase):
         self.assertGreater(len(cards), 0)
         self.assertEqual(cards[0].name, "자연스러운 카드")
 
+    def test_adjust_deck_count_impossible_should_raise_value_error(self) -> None:
+        """카드 장수 한계로 인해 덱 매수를 40장으로 조정하는 것이 불가능할 때 ValueError가 발생하는지 검증합니다."""
+        # 5개의 카드만 존재할 경우 최대 매수는 15장이므로 40장 조정은 불가능합니다.
+        cards = [
+            logic.Card(f"카드{i}", 2.0, 0.5) for i in range(5)
+        ]
+        # 강제로 rounded_average를 설정하여 15장 상태로 만듭니다.
+        for card in cards:
+            card.rounded_average = 3
+            card.adjusted_count = 3
+            
+        with self.assertRaises(ValueError):
+            logic.adjust_deck_count(cards)
+
 if __name__ == "__main__":
     unittest.main()

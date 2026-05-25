@@ -196,7 +196,8 @@ def calculate_initial_analysis(soup: BeautifulSoup) -> List[Card]:
         cards.append(Card(card_name_text, weighted_average, weighted_variance))
     return cards
 
-def adjust_deck_count(cards):
+def adjust_deck_count(cards: List[Card]) -> None:
+    """통계 페널티를 최소화하면서 덱의 카드 총합을 40장으로 동적 조정합니다."""
     v_avg = np.array([card.weighted_average for card in cards])
     v_std_dev = np.array([card.std_dev for card in cards])
     v_current = np.array([card.rounded_average for card in cards])
@@ -226,6 +227,9 @@ def adjust_deck_count(cards):
             cards_to_adjust += adjustment
         else:
             break
+
+    if cards_to_adjust != 0:
+        raise ValueError("덱 매수를 40장으로 조정하는 것이 불가능합니다.")
 
 def select_replacement_candidates(cards):
     v_avg = np.array([card.weighted_average for card in cards])
