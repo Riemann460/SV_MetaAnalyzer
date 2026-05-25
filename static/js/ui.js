@@ -10,13 +10,17 @@ function getScoreSymbol(score) {
 }
 
 function populateRow(tableBody, card) {
+    // 이 함수는 테이블의 각 카드 행을 생성하고 스타일을 지정합니다.
     const row = tableBody.insertRow();
     row.dataset.cardName = card.name;
 
-    if (card.adjusted_count > card.original_adjusted_count) {
-        row.className = 'count-increased';
-    } else if (card.adjusted_count < card.original_adjusted_count) {
-        row.className = 'count-decreased';
+    const currentCount = parseInt(card.adjusted_count);
+    const originalCount = parseInt(card.original_adjusted_count);
+
+    if (currentCount > originalCount) {
+        row.className = 'count-increased row-modified';
+    } else if (currentCount < originalCount) {
+        row.className = 'count-decreased row-modified';
     }
 
     row.insertCell().textContent = card.name;
@@ -25,13 +29,23 @@ function populateRow(tableBody, card) {
 
     const countCell = row.insertCell();
     countCell.innerHTML = `
-        <button class="adjust-btn" data-action="decrease" data-card-name="${card.name}">-</button>
-        <span>${card.adjusted_count}</span>
-        <button class="adjust-btn" data-action="increase" data-card-name="${card.name}">+</button>
+        <button class="btn-qty adjust-btn" data-action="decrease" data-card-name="${card.name}">-</button>
+        <span class="qty-display">${card.adjusted_count}</span>
+        <button class="btn-qty adjust-btn" data-action="increase" data-card-name="${card.name}">+</button>
     `;
 
-    row.insertCell().textContent = getScoreSymbol(card.removability_score);
-    row.insertCell().textContent = getScoreSymbol(card.addability_score);
+    const removabilitySymbol = getScoreSymbol(card.removability_score);
+    const addabilitySymbol = getScoreSymbol(card.addability_score);
+
+    const getBadgeHTML = (symbol) => {
+        if (symbol === 'O') return `<span class="badge-score badge-green">O</span>`;
+        if (symbol === '△') return `<span class="badge-score badge-neutral">△</span>`;
+        if (symbol === 'X') return `<span class="badge-score badge-red">X</span>`;
+        return `<span class="badge-score badge-neutral">${symbol}</span>`;
+    };
+
+    row.insertCell().innerHTML = getBadgeHTML(removabilitySymbol);
+    row.insertCell().innerHTML = getBadgeHTML(addabilitySymbol);
 }
 
 export function redrawTable(tableBody, deckTotalSpan, currentDeckData) {

@@ -1,0 +1,280 @@
+/*
+* static/css/styles.css
+* 이 스타일시트는 SV Meta Analyzer의 메인 프리미엄 UI 디자인 시스템을 정의합니다.
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
+
+:root {
+    --bg-gradient: radial-gradient(circle at top, #141923 0%, #090b10 100%);
+    --panel-bg: rgba(22, 28, 41, 0.7);
+    --panel-border: rgba(255, 255, 255, 0.08);
+    --primary: #4f46e5;
+    --primary-hover: #6366f1;
+    --primary-glow: rgba(79, 70, 229, 0.4);
+    --text-main: #f3f4f6;
+    --text-muted: #9ca3af;
+    --accent-green: #10b981;
+    --accent-red: #ef4444;
+    --accent-yellow: #f59e0b;
+    --shadow-main: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body {
+    background: var(--bg-gradient);
+    color: var(--text-main);
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    margin: 0;
+    padding: 2rem 1.5rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+h1 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 2.5rem;
+    background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #4f46e5 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 2rem;
+    text-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+    letter-spacing: -0.03em;
+}
+
+.controls {
+    background: var(--panel-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--panel-border);
+    box-shadow: var(--shadow-main);
+    border-radius: 16px;
+    padding: 1.5rem 2rem;
+    width: 100%;
+    max-width: 960px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    align-items: flex-end;
+    margin-bottom: 2rem;
+    box-sizing: border-box;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.control-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.control-group select {
+    background: rgba(10, 12, 18, 0.8);
+    border: 1px solid var(--panel-border);
+    color: var(--text-main);
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    outline: none;
+    cursor: pointer;
+    transition: var(--transition);
+    width: 100%;
+}
+
+.control-group select:hover {
+    border-color: rgba(99, 102, 241, 0.5);
+}
+
+.control-group select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+#copy-deck-button {
+    background: linear-gradient(135deg, var(--primary) 0%, #3b82f6 100%);
+    border: none;
+    color: white;
+    font-weight: 700;
+    padding: 0.85rem 1.5rem;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+    transition: var(--transition);
+    width: 100%;
+}
+
+#copy-deck-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+    background: linear-gradient(135deg, var(--primary-hover) 0%, #60a5fa 100%);
+}
+
+#copy-deck-button:active {
+    transform: translateY(0);
+}
+
+#copy-feedback {
+    display: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent-green);
+    text-align: center;
+    margin-top: 0.4rem;
+    animation: fadeIn 0.2s ease-out;
+}
+
+#deck-total {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent-yellow);
+    text-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+table {
+    width: 100%;
+    max-width: 960px;
+    border-collapse: collapse;
+    background: var(--panel-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--panel-border);
+    box-shadow: var(--shadow-main);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+th {
+    background: rgba(15, 23, 42, 0.6);
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1.1rem 1.5rem;
+    text-align: left;
+    border-bottom: 1px solid var(--panel-border);
+    user-select: none;
+}
+
+th.sortable {
+    cursor: pointer;
+    position: relative;
+    transition: var(--transition);
+}
+
+th.sortable:hover {
+    color: var(--text-main);
+    background: rgba(79, 70, 229, 0.1);
+}
+
+td {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    font-size: 0.95rem;
+    transition: var(--transition);
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tr:hover td {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* 카드 이름 특별 디자인 */
+td:first-child {
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+/* 변경된 행 하이라이트 */
+.row-modified td {
+    background: rgba(245, 158, 11, 0.04);
+    border-bottom-color: rgba(245, 158, 11, 0.15);
+}
+
+.count-increased td:first-child {
+    border-left: 3px solid var(--accent-green);
+}
+
+.count-decreased td:first-child {
+    border-left: 3px solid var(--accent-red);
+}
+
+/* 수량 조정 버튼 */
+.btn-qty {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--panel-border);
+    color: var(--text-main);
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 0.4rem;
+    transition: var(--transition);
+}
+
+.btn-qty:hover {
+    background: var(--primary);
+    border-color: var(--primary-hover);
+    box-shadow: 0 0 8px var(--primary-glow);
+}
+
+.qty-display {
+    display: inline-block;
+    width: 20px;
+    text-align: center;
+    font-weight: 700;
+}
+
+/* 추천/제거 아이콘 뱃지 */
+.badge-score {
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: inline-block;
+}
+
+.badge-green {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--accent-green);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.badge-red {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--accent-red);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.badge-neutral {
+    background: rgba(156, 163, 175, 0.15);
+    color: var(--text-muted);
+    border: 1px solid rgba(156, 163, 175, 0.2);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
