@@ -105,9 +105,11 @@ def calculate_initial_analysis(soup: BeautifulSoup) -> List[Card]:
                 num_samples = 0
 
         if num_samples == 0:
-            streak_header = header_rows[0].find("th", string=lambda t: t and '連勝수' in t)
+            # rensho_or_count ID가 존재하면 우선적으로 사용합니다.
+            streak_header = header_rows[0].find("th", id="rensho_or_count")
             if not streak_header:
-                streak_header = header_rows[0].find("th", string=lambda t: t and '連勝数' in t)
+                # ID가 없는 경우 텍스트 매칭을 통해 련승 또는 순위 컬럼을 탐색합니다.
+                streak_header = header_rows[0].find("th", string=lambda t: t and ('連勝' in t or '順位' in t))
             if streak_header and streak_header.has_attr('colspan'):
                 try:
                     num_samples = int(streak_header['colspan'])
@@ -115,9 +117,7 @@ def calculate_initial_analysis(soup: BeautifulSoup) -> List[Card]:
                     num_samples = 0
 
         if num_samples == 0:
-            generic_header = header_rows[0].find("th", string=lambda t: t and '採用枚수' in t)
-            if not generic_header:
-                generic_header = header_rows[0].find("th", string=lambda t: t and '採用枚数' in t)
+            generic_header = header_rows[0].find("th", string=lambda t: t and '採用枚' in t)
             if generic_header and generic_header.has_attr('colspan'):
                 try:
                     num_samples = int(generic_header['colspan'])

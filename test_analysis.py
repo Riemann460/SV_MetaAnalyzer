@@ -73,5 +73,45 @@ class TestAnalysisLogic(unittest.TestCase):
         with self.assertRaises(ValueError):
             logic.adjust_deck_count(cards)
 
+    def test_calculate_initial_analysis_jcg_data(self) -> None:
+        """JCG 대회 결과 등 '順位' 및 'id=rensho_or_count' 속성을 사용하는 테이블 구조를 정상적으로 파싱하는지 검증합니다."""
+        jcg_html = """
+        <html>
+        <body>
+            <table>
+                <thead id="table_header">
+                    <tr>
+                        <th>進化E</th>
+                        <th colspan="2" id="rensho_or_count">順位</th>
+                        <th>평균</th>
+                    </tr>
+                    <tr>
+                        <th>1</th>
+                        <th>2</th>
+                    </tr>
+                </thead>
+                <tbody id="decklist_body">
+                    <tr>
+                        <td>使用일</td>
+                        <td>05/25</td>
+                        <td>05/25</td>
+                    </tr>
+                    <tr>
+                        <td><div class="name_backimg2">자연스러운 카드</div></td>
+                        <td>3</td>
+                        <td>3</td>
+                    </tr>
+                </tbody>
+            </table>
+        </body>
+        </html>
+        """
+        soup = BeautifulSoup(jcg_html, "html.parser")
+        cards = logic.calculate_initial_analysis(soup)
+        
+        self.assertIsNotNone(cards)
+        self.assertGreater(len(cards), 0)
+        self.assertEqual(cards[0].name, "자연스러운 카드")
+
 if __name__ == "__main__":
     unittest.main()
