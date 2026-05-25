@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+# 이 파일은 Flask 웹 애플리케이션의 라우팅과 API 엔드포인트를 정의합니다.
 import os
 from flask import Flask, render_template, jsonify, request
 
@@ -18,6 +20,11 @@ def index():
         deck_names = scraper.get_deck_names(default_post_url)
         if not deck_names:
             return "덱 이름을 가져오지 못했습니다.", 500
+        
+        # 덱 선택 플레이스홀더 항목은 분석에서 필터링합니다.
+        deck_names = [d for d in deck_names if d != 'デッキ選択']
+        if not deck_names:
+            return "분석 가능한 덱 타입이 없습니다.", 500
         
         default_deck_name = deck_names[0]
         initial_data = logic.analyze_live_data(default_post_url, default_deck_name)
@@ -59,6 +66,9 @@ def get_deck_names_for_post():
         deck_names = scraper.get_deck_names(post_url)
         if not deck_names:
             return jsonify({"error": "덱 이름을 가져오지 못했습니다."}), 500
+        
+        # 덱 선택 플레이스홀더 항목을 필터링합니다.
+        deck_names = [d for d in deck_names if d != 'デッキ選択']
         return jsonify(deck_names)
     except Exception as e:
         print(f"get_deck_names_for_post 라우트에서 오류 발생: {e}")

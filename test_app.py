@@ -34,5 +34,21 @@ class TestAppRoutes(unittest.TestCase):
         html_content = response.data.decode('utf-8')
         self.assertIn('static/css/styles.css', html_content)
 
+    @patch('scraper.get_post_list')
+    @patch('scraper.get_deck_names')
+    @patch('logic.analyze_live_data')
+    def test_index_route_filters_out_deck_select_placeholder(self, mock_analyze, mock_get_decks, mock_get_posts) -> None:
+        """인덱스 페이지에서 'デッキ選択' 덱 선택 플레이스홀더를 필터링하는지 검증합니다."""
+        mock_get_posts.return_value = [{"title": "테스트 포스트", "url": "http://test.url"}]
+        mock_get_decks.return_value = ["デッキ選択", "테스트 덱"]
+        mock_analyze.return_value = [{"name": "테스트 카드", "average": "1.0", "variance": "0.0", "std_dev": "0.0", "rounded_average": "1", "delta": "0.0", "adjusted_count": "1", "removability_score": "1.0", "addability_score": "1.0"}]
+
+        response = self.client.get('/')
+        self.assertEqual(response.status_code, 200)
+        
+        # HTML 내용에 'デッキ選択'이 포함되지 않았는지 검증합니다.
+        html_content = response.data.decode('utf-8')
+        self.assertNotIn('デッキ選択', html_content)
+
 if __name__ == '__main__':
     unittest.main()
